@@ -33,6 +33,9 @@ global-banners: false
 # Has no effect when global-banners is already true.
 global-creative-banners: false
 
+# When true, players with enchantedloom.admin can delete any saved banner design, not just their own.
+allow-admin-delete-banners: false
+
 # Whether the plugin should glow (enchantment glint) on the Enchanted Loom item.
 item-glow: true
 
