@@ -5,85 +5,121 @@ import com.enchantedloom.gui.EnchantedLoomGUI;
 import com.enchantedloom.gui.GUISession;
 import com.enchantedloom.util.Messages;
 import org.bukkit.Material;
-import org.bukkit.Tag;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.List;
 
 /**
- * Intercepts interactions with an Enchanted Loom block/item.
+ * Manages the lifecycle of placed Enchanted Loom blocks and intercepts right-click
+ * interactions on those blocks to open the custom GUI.
  * <p>
- * An Enchanted Loom is identified via its PDC marker. When placed as a
- * block the PDC is on the loom item held; the placed block itself is a
- * vanilla loom – player interaction with it is caught here to open the GUI.
+ * Vanilla loom blocks are never intercepted — only blocks registered in
+ * {@link com.enchantedloom.util.EnchantedLoomRegistry} open the custom GUI.
  */
 public class BlockListener implements Listener {
 
     private final EnchantedLoomPlugin plugin;
-    /** Tracks which loom block locations were originally placed by an Enchanted Loom item. */
-    private final Map<UUID, Long> recentLoomInteractions = new HashMap<>();
 
     public BlockListener(EnchantedLoomPlugin plugin) {
         this.plugin = plugin;
     }
 
+    // -------------------------------------------------------------------------
+    // Block lifecycle — keep registry in sync
+    // -------------------------------------------------------------------------
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        if (plugin.getItemFactory().isEnchantedLoom(event.getItemInHand())) {
+            plugin.getLoomRegistry().add(event.getBlockPlaced().getLocation());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        if (event.getBlock().getType() == Material.LOOM) {
+            plugin.getLoomRegistry().remove(event.getBlock().getLocation());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockExplode(BlockExplodeEvent event) {
+        event.blockList().stream()
+                .filter(b -> b.getType() == Material.LOOM)
+                .forEach(b -> plugin.getLoomRegistry().remove(b.getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent event) {
+        event.blockList().stream()
+                .filter(b -> b.getType() == Material.LOOM)
+                .forEach(b -> plugin.getLoomRegistry().remove(b.getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPistonExtend(BlockPistonExtendEvent event) {
+        relocateBlocks(event.getBlocks(), event.getDirection());
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPistonRetract(BlockPistonRetractEvent event) {
+        relocateBlocks(event.getBlocks(), event.getDirection());
+    }
+
+    private void relocateBlocks(List<Block> blocks, BlockFace direction) {
+        for (Block block : blocks) {
+            if (block.getType() == Material.LOOM
+                    && plugin.getLoomRegistry().contains(block.getLocation())) {
+                plugin.getLoomRegistry().remove(block.getLocation());
+                plugin.getLoomRegistry().add(block.getRelative(direction).getLocation());
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Interaction
+    // -------------------------------------------------------------------------
+
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
-        // Only care about right-click
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK
-                && event.getAction() != Action.RIGHT_CLICK_AIR) return;
-
-        // Ignore off-hand to avoid double-firing
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (event.getHand() == EquipmentSlot.OFF_HAND) return;
 
-        Player player = event.getPlayer();
-
-        // --- Case 1: right-clicking a loom block ---
         Block clicked = event.getClickedBlock();
-        if (clicked != null && clicked.getType() == Material.LOOM) {
-            if (!player.hasPermission("enchantedloom.use")) {
-                player.sendMessage(Messages.get("no-permission", plugin));
-                event.setCancelled(true);
-                return;
-            }
-            // Cancel the vanilla loom UI and open our GUI instead
+        if (clicked == null || clicked.getType() != Material.LOOM) return;
+
+        // Only intercept blocks registered as Enchanted Looms; leave vanilla looms alone
+        if (!plugin.getLoomRegistry().contains(clicked.getLocation())) return;
+
+        Player player = event.getPlayer();
+        if (!player.hasPermission("enchantedloom.use")) {
+            player.sendMessage(Messages.get("no-permission", plugin));
             event.setCancelled(true);
-            openGUI(player);
             return;
         }
 
-        // --- Case 2: right-clicking with the Enchanted Loom item in hand ---
-        ItemStack hand = event.getItem();
-        if (hand != null && plugin.getItemFactory().isEnchantedLoom(hand)) {
-            if (!player.hasPermission("enchantedloom.use")) {
-                player.sendMessage(Messages.get("no-permission", plugin));
-                event.setCancelled(true);
-                return;
-            }
-            // If they clicked air or a non-loom block, open GUI directly
-            if (clicked == null || clicked.getType() != Material.LOOM) {
-                event.setCancelled(true);
-                openGUI(player);
-            }
-            // If they clicked a loom block, the Case 1 handler above fires first
-        }
+        event.setCancelled(true);
+        openGUI(player);
     }
 
     private void openGUI(Player player) {
         GUISession session = new GUISession(player);
         EnchantedLoomGUI gui = new EnchantedLoomGUI(plugin, session);
         gui.open();
-        // Store session so GUIListener can retrieve it
         GUISessionRegistry.register(player.getUniqueId(), session, gui);
     }
 }
