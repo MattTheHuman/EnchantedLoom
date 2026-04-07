@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -94,7 +95,23 @@ public class BannerStorage {
                 } catch (IllegalArgumentException ignored) {}
             }
             String display = player.getString(name + ".display", name);
-            result.put(name, new SavedBanner(name, display, base, layers));
+            result.put(name, new SavedBanner(name, display, base, layers, playerId));
+        }
+        return result;
+    }
+
+    /**
+     * Returns all saved banners across every player, ordered by player then insertion.
+     */
+    public List<SavedBanner> getAllBanners() {
+        List<SavedBanner> result = new ArrayList<>();
+        ConfigurationSection players = yaml.getConfigurationSection("players");
+        if (players == null) return result;
+        for (String uuidStr : players.getKeys(false)) {
+            try {
+                UUID id = UUID.fromString(uuidStr);
+                result.addAll(getBanners(id).values());
+            } catch (IllegalArgumentException ignored) {}
         }
         return result;
     }
@@ -142,5 +159,5 @@ public class BannerStorage {
     // Value type
     // -------------------------------------------------------------------------
 
-    public record SavedBanner(String name, String displayName, DyeColor base, List<Pattern> layers) {}
+    public record SavedBanner(String name, String displayName, DyeColor base, List<Pattern> layers, UUID ownerId) {}
 }

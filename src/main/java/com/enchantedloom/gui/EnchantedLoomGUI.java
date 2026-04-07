@@ -369,9 +369,7 @@ public class EnchantedLoomGUI {
     // =========================================================================
 
     private void populateSavedBanners(Inventory inv) {
-        BannerStorage storage = plugin.getBannerStorage();
-        List<BannerStorage.SavedBanner> banners = new ArrayList<>(
-                storage.getBanners(session.getPlayer().getUniqueId()).values());
+        List<BannerStorage.SavedBanner> banners = getVisibleBanners();
 
         int page      = session.getSavedBannersPage();
         int start     = page * SAVED_GRID_SIZE;
@@ -420,12 +418,18 @@ public class EnchantedLoomGUI {
     }
 
     private ItemStack buildSavedBannerItem(BannerStorage.SavedBanner saved) {
+        boolean isGlobal = isGlobalMode();
         ItemStack banner = new ItemStack(bannerMaterialFor(saved.base()));
         BannerMeta meta  = (BannerMeta) banner.getItemMeta();
         if (meta != null) {
             for (Pattern p : saved.layers()) meta.addPattern(p);
             meta.displayName(MiniMessage.miniMessage().deserialize(saved.displayName()));
             List<String> lore = new ArrayList<>();
+            if (isGlobal) {
+                String ownerName = org.bukkit.Bukkit.getOfflinePlayer(saved.ownerId()).getName();
+                lore.add(ChatColor.DARK_AQUA + "By: " + ChatColor.WHITE
+                        + (ownerName != null ? ownerName : saved.ownerId().toString()));
+            }
             lore.add(ChatColor.GRAY + "Base: " + ChatColor.WHITE + formatDyeName(saved.base()));
             lore.add(ChatColor.GRAY + "Layers: " + ChatColor.WHITE + saved.layers().size());
             for (int i = 0; i < saved.layers().size(); i++) {
@@ -444,7 +448,11 @@ public class EnchantedLoomGUI {
             } else {
                 lore.add(ChatColor.GREEN + "Left-click to get a copy.");
             }
-            lore.add(ChatColor.RED     + "Shift-click to delete.");
+            boolean canDelete = saved.ownerId().equals(session.getPlayer().getUniqueId())
+                    || session.getPlayer().hasPermission("enchantedloom.admin");
+            if (canDelete) {
+                lore.add(ChatColor.RED + "Shift-click to delete.");
+            }
             meta.setLore(lore);
             banner.setItemMeta(meta);
         }
@@ -454,6 +462,25 @@ public class EnchantedLoomGUI {
     // =========================================================================
     // Banner builder (used by GUI + GUIListener confirm)
     // =========================================================================
+
+    /** Returns the banner list visible to this player based on global-banners config. */
+    public List<BannerStorage.SavedBanner> getVisibleBanners() {
+        boolean globalAll      = plugin.getConfig().getBoolean("global-banners", false);
+        boolean globalCreative = plugin.getConfig().getBoolean("global-creative-banners", false);
+        boolean isCreative     = session.getPlayer().getGameMode() == org.bukkit.GameMode.CREATIVE;
+        if (globalAll || (globalCreative && isCreative)) {
+            return plugin.getBannerStorage().getAllBanners();
+        }
+        return new ArrayList<>(plugin.getBannerStorage().getBanners(session.getPlayer().getUniqueId()).values());
+    }
+
+    /** Returns true if the player is currently viewing a global (all-players) banner list. */
+    public boolean isGlobalMode() {
+        boolean globalAll      = plugin.getConfig().getBoolean("global-banners", false);
+        boolean globalCreative = plugin.getConfig().getBoolean("global-creative-banners", false);
+        boolean isCreative     = session.getPlayer().getGameMode() == org.bukkit.GameMode.CREATIVE;
+        return globalAll || (globalCreative && isCreative);
+    }
 
     /** Builds the current banner ItemStack from session state. */
     public ItemStack buildCurrentBanner() {

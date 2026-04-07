@@ -208,9 +208,7 @@ public class GUIListener implements Listener {
 
     private void handleSavedBanners(int slot, boolean isShift, GUISession session,
                                     EnchantedLoomGUI gui, Player player) {
-        BannerStorage storage = plugin.getBannerStorage();
-        List<BannerStorage.SavedBanner> banners = new ArrayList<>(
-                storage.getBanners(player.getUniqueId()).values());
+        List<BannerStorage.SavedBanner> banners = gui.getVisibleBanners();
 
         int page  = session.getSavedBannersPage();
         int start = page * EnchantedLoomGUI.getSavedGridSize();
@@ -243,8 +241,14 @@ public class GUIListener implements Listener {
             BannerStorage.SavedBanner saved = banners.get(idx);
 
             if (isShift) {
-                // Delete the saved design
-                storage.deleteBanner(player.getUniqueId(), saved.name());
+                // Only the owner (or an admin) may delete a design
+                boolean canDelete = saved.ownerId().equals(player.getUniqueId())
+                        || player.hasPermission("enchantedloom.admin");
+                if (!canDelete) {
+                    player.sendMessage(Messages.get("no-permission", plugin));
+                    return;
+                }
+                plugin.getBannerStorage().deleteBanner(saved.ownerId(), saved.name());
                 player.sendMessage(plugin.getConfig().getString(
                         "messages.banner-deleted", "&cDeleted saved banner: &f{name}")
                         .replace("{name}", saved.name())

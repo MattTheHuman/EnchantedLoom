@@ -26,6 +26,13 @@ max-banner-layers: 6
 # Creative mode players always bypass this requirement regardless of this setting.
 require-blank-banner: true
 
+# When true, all players can browse and retrieve every saved banner design from every player.
+global-banners: false
+
+# When true, players in creative mode can browse and retrieve every saved banner design from every player.
+# Has no effect when global-banners is already true.
+global-creative-banners: false
+
 # Whether the plugin should glow (enchantment glint) on the Enchanted Loom item.
 item-glow: true
 
