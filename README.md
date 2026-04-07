@@ -4,6 +4,10 @@ A Paper plugin for Minecraft 1.21 that adds a craftable Enchanted Loom — a sur
 
 > Built using [Claude](https://claude.ai) (Anthropic) for a private Minecraft server.
 
+<p align="center">
+  <img src="images/Enchanted%20Loom%20-%201%20-%20GUI.png" alt="Enchanted Loom — Base Colour step" width="340">
+</p>
+
 ## Features
 
 - **Survival-friendly crafting** — craft a Diamond String and use it to craft the Enchanted Loom
@@ -23,7 +27,10 @@ A Paper plugin for Minecraft 1.21 that adds a craftable Enchanted Loom — a sur
 
 ## Crafting
 
-**Diamond String**
+**Step 1 — Diamond String**
+
+Place four diamonds around a piece of string:
+
 ```
 . D .
 D S D
@@ -31,12 +38,51 @@ D S D
 ```
 `D` = Diamond, `S` = String
 
-**Enchanted Loom**
+<p align="center">
+  <img src="images/Enchanted%20Loom%20-%206%20-%20Diamond%20String.png" alt="Diamond String crafting recipe" width="340">
+</p>
+
+**Step 2 — Enchanted Loom**
+
+Place two Diamond Strings across the top and two planks across the bottom:
+
 ```
 A A
 B B
 ```
 `A` = Diamond String, `B` = any Plank
+
+<p align="center">
+  <img src="images/Enchanted%20Loom%20-%207%20-%20Crafting.png" alt="Enchanted Loom crafting recipe" width="340">
+</p>
+
+## GUI
+
+Right-clicking the Enchanted Loom opens a three-step wizard:
+
+1. **Base Colour** — choose the colour of the blank banner
+2. **Add Pattern** — browse every available Minecraft banner pattern; hover for a tooltip preview
+3. **Pattern Colour** — pick the colour for that pattern layer, then click to add it
+
+Repeat steps 2–3 to layer up to six patterns, then take the finished banner.
+
+<p align="center">
+  <img src="images/Enchanted%20Loom%20-%201%20-%20GUI.png" alt="Step 1: Base Colour" width="260">
+  &nbsp;
+  <img src="images/Enchanted%20Loom%20-%202%20-%20Border%20Select.png" alt="Step 2: Add Pattern" width="310">
+  &nbsp;
+  <img src="images/Enchanted%20Loom%20-%203%20-%20Colour%20Select.png" alt="Step 3: Pattern Colour" width="310">
+</p>
+
+## Saving Designs
+
+While in the pattern picker, click **Save Design** (the book icon) to name and save your current design via chat. Open the Saved Banners screen at any time to browse your designs — left-click to get a copy, shift-click to delete.
+
+<p align="center">
+  <img src="images/Enchanted%20Loom%20-%204%20-%20Save%20Banners.png" alt="Save Design button" width="330">
+  &nbsp;&nbsp;
+  <img src="images/Enchanted%20Loom%20-%205%20-%20Saved%20Banners.png" alt="Saved Banners list" width="260">
+</p>
 
 ## Building from source
 
