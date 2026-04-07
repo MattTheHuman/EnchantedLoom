@@ -277,20 +277,32 @@ public class EnchantedLoomGUI {
 
         inv.setItem(SLOT_PT_PREVIEW, buildPreviewBanner());
 
+        boolean requireBlank = plugin.getConfig().getBoolean("require-blank-banner", true);
+        boolean isCreative   = session.getPlayer().getGameMode() == org.bukkit.GameMode.CREATIVE;
+        boolean needsBanner  = requireBlank && !isCreative;
+
         String takenLine = session.getBannersTaken() > 0
                 ? ChatColor.DARK_AQUA + "Taken this session: " + session.getBannersTaken()
-                : ChatColor.GRAY + "Consumes one blank "
-                        + ChatColor.WHITE + formatDyeName(session.getBaseColor())
-                        + ChatColor.GRAY + " banner from your inventory.";
+                : needsBanner
+                        ? ChatColor.GRAY + "Consumes one blank "
+                                + ChatColor.WHITE + formatDyeName(session.getBaseColor())
+                                + ChatColor.GRAY + " banner from your inventory."
+                        : ChatColor.GRAY + "Click to receive a copy of this banner.";
+
+        List<String> confirmLore = new ArrayList<>();
+        if (needsBanner) {
+            confirmLore.add(ChatColor.GRAY + "Requires a blank "
+                    + ChatColor.WHITE + formatDyeName(session.getBaseColor())
+                    + ChatColor.GRAY + " banner in your inventory.");
+        } else if (isCreative) {
+            confirmLore.add(ChatColor.AQUA + "Creative mode — no banner required.");
+        }
+        confirmLore.add(ChatColor.GRAY + "Layers: " + session.getLayers().size());
+        confirmLore.add(takenLine);
+
         inv.setItem(SLOT_CONFIRM, makeControl(Material.EMERALD,
                 ChatColor.GREEN + "" + ChatColor.BOLD + "Take Banner",
-                List.of(
-                        ChatColor.GRAY + "Requires a blank "
-                                + ChatColor.WHITE + formatDyeName(session.getBaseColor())
-                                + ChatColor.GRAY + " banner in your inventory.",
-                        ChatColor.GRAY + "Layers: " + session.getLayers().size(),
-                        takenLine
-                )));
+                confirmLore));
     }
 
     private ItemStack buildPatternGridItem(PatternType type, boolean atMax) {

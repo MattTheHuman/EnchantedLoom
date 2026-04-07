@@ -21,6 +21,11 @@ patterns-per-page: 27
 # Maximum number of banner layers (Minecraft default is 6).
 max-banner-layers: 6
 
+# Whether "Take Banner" requires the player to have a matching blank banner in their inventory.
+# Survival players must supply a blank banner of the matching base colour to receive the patterned one.
+# Creative mode players always bypass this requirement regardless of this setting.
+require-blank-banner: true
+
 # Whether the plugin should glow (enchantment glint) on the Enchanted Loom item.
 item-glow: true
 

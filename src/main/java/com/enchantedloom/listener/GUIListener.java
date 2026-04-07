@@ -278,39 +278,45 @@ public class GUIListener implements Listener {
     // -------------------------------------------------------------------------
 
     /**
-     * Consumes one blank banner of the matching base colour from the player's
-     * inventory and gives them the patterned banner in return.
+     * Gives the player the patterned banner.
+     * If {@code require-blank-banner} is enabled in config and the player is not in creative mode,
+     * a matching blank banner is consumed from their inventory first.
      *
-     * @return true if the banner was given, false if the player lacked a blank banner
+     * @return true if the banner was given, false if the player lacked a required blank banner
      */
     private boolean giveBanner(Player player, GUISession session, EnchantedLoomGUI gui) {
-        Material blankMaterial = EnchantedLoomGUI.bannerMaterialFor(session.getBaseColor());
+        boolean requireBlank = plugin.getConfig().getBoolean("require-blank-banner", true);
+        boolean isCreative   = player.getGameMode() == org.bukkit.GameMode.CREATIVE;
 
-        // Find a blank (no patterns) banner of the matching colour
-        ItemStack[] contents = player.getInventory().getContents();
-        int consumeSlot = -1;
-        for (int i = 0; i < contents.length; i++) {
-            ItemStack item = contents[i];
-            if (item == null || item.getType() != blankMaterial) continue;
-            ItemMeta meta = item.getItemMeta();
-            if (!(meta instanceof BannerMeta bannerMeta)) continue;
-            if (!bannerMeta.getPatterns().isEmpty()) continue;
-            consumeSlot = i;
-            break;
-        }
+        if (requireBlank && !isCreative) {
+            Material blankMaterial = EnchantedLoomGUI.bannerMaterialFor(session.getBaseColor());
 
-        if (consumeSlot == -1) {
-            player.sendMessage(Messages.get("banner-no-blank-banner", plugin,
-                    "color", EnchantedLoomGUI.formatDyeName(session.getBaseColor())));
-            return false;
-        }
+            // Find a blank (no patterns) banner of the matching colour
+            ItemStack[] contents = player.getInventory().getContents();
+            int consumeSlot = -1;
+            for (int i = 0; i < contents.length; i++) {
+                ItemStack item = contents[i];
+                if (item == null || item.getType() != blankMaterial) continue;
+                ItemMeta meta = item.getItemMeta();
+                if (!(meta instanceof BannerMeta bannerMeta)) continue;
+                if (!bannerMeta.getPatterns().isEmpty()) continue;
+                consumeSlot = i;
+                break;
+            }
 
-        // Consume the blank banner
-        ItemStack blank = player.getInventory().getItem(consumeSlot);
-        if (blank.getAmount() > 1) {
-            blank.setAmount(blank.getAmount() - 1);
-        } else {
-            player.getInventory().setItem(consumeSlot, null);
+            if (consumeSlot == -1) {
+                player.sendMessage(Messages.get("banner-no-blank-banner", plugin,
+                        "color", EnchantedLoomGUI.formatDyeName(session.getBaseColor())));
+                return false;
+            }
+
+            // Consume the blank banner
+            ItemStack blank = player.getInventory().getItem(consumeSlot);
+            if (blank.getAmount() > 1) {
+                blank.setAmount(blank.getAmount() - 1);
+            } else {
+                player.getInventory().setItem(consumeSlot, null);
+            }
         }
 
         // Give the patterned banner
