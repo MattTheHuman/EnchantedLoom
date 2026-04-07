@@ -38,6 +38,7 @@ public class EnchantedLoomCommand implements CommandExecutor, TabCompleter {
             case "open"   -> openCmd.onCommand(sender, command, label, subArgs);
             case "give"   -> giveCmd.onCommand(sender, command, label, subArgs);
             case "banner" -> bannerCmd.onCommand(sender, command, label, subArgs);
+            case "reload" -> handleReload(sender);
             case "help"   -> { sendHelp(sender); yield true; }
             default       -> { sendHelp(sender); yield true; }
         };
@@ -47,7 +48,7 @@ public class EnchantedLoomCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command,
                                       String alias, String[] args) {
         if (args.length == 1) {
-            return List.of("open", "give", "banner", "help");
+            return List.of("open", "give", "banner", "reload", "help");
         }
         if (args.length >= 2) {
             String sub = args[0].toLowerCase();
@@ -70,7 +71,19 @@ public class EnchantedLoomCommand implements CommandExecutor, TabCompleter {
                 + org.bukkit.ChatColor.GRAY + " - Give an Enchanted Loom item");
         sender.sendMessage(org.bukkit.ChatColor.YELLOW + "/eloom banner <base> [pattern:colour ...] [player]"
                 + org.bukkit.ChatColor.GRAY + " - Generate a patterned banner");
+        sender.sendMessage(org.bukkit.ChatColor.YELLOW + "/eloom reload"
+                + org.bukkit.ChatColor.GRAY + " - Reload the plugin configuration");
         sender.sendMessage(org.bukkit.ChatColor.GRAY
-                + "Shorthand commands: /elopen, /elgive, /elbanner");
+                + "Shorthand commands: /elopen, /elgive, /elbanner, /elreload");
+    }
+
+    private boolean handleReload(CommandSender sender) {
+        if (!sender.hasPermission("enchantedloom.admin")) {
+            sender.sendMessage(Messages.get("no-permission", plugin));
+            return true;
+        }
+        plugin.reloadPlugin();
+        sender.sendMessage(org.bukkit.ChatColor.GREEN + "EnchantedLoom configuration reloaded.");
+        return true;
     }
 }

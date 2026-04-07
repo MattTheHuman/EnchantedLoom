@@ -23,6 +23,10 @@ commands:
     description: Generate a patterned banner and give it to a player.
     usage: /elbanner <base_color> [pattern:color ...] [player]
     permission: enchantedloom.banner
+  elreload:
+    description: Reload the EnchantedLoom configuration.
+    usage: /elreload
+    permission: enchantedloom.admin
 
 permissions:
   enchantedloom.open:

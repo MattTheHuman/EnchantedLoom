@@ -4,6 +4,7 @@ import com.enchantedloom.command.BannerCommand;
 import com.enchantedloom.command.EnchantedLoomCommand;
 import com.enchantedloom.command.GiveCommand;
 import com.enchantedloom.command.OpenCommand;
+import com.enchantedloom.command.ReloadCommand;
 import com.enchantedloom.listener.BlockListener;
 import com.enchantedloom.listener.ChatNameListener;
 import com.enchantedloom.listener.GUIListener;
@@ -63,6 +64,8 @@ public class EnchantedLoomPlugin extends JavaPlugin {
         Objects.requireNonNull(getCommand("elgive")).setTabCompleter(new GiveCommand(this));
         Objects.requireNonNull(getCommand("elbanner")).setExecutor(new BannerCommand(this));
         Objects.requireNonNull(getCommand("elbanner")).setTabCompleter(new BannerCommand(this));
+        ReloadCommand reloadCmd = new ReloadCommand(this);
+        Objects.requireNonNull(getCommand("elreload")).setExecutor(reloadCmd);
 
         getLogger().info("EnchantedLoom enabled successfully!");
     }
@@ -71,6 +74,15 @@ public class EnchantedLoomPlugin extends JavaPlugin {
     public void onDisable() {
         loomRegistry.save();
         getLogger().info("EnchantedLoom disabled.");
+    }
+
+    /**
+     * Reloads the plugin configuration from disk, writing any missing defaults first.
+     */
+    public void reloadPlugin() {
+        reloadConfig();
+        getConfig().options().copyDefaults(true);
+        saveConfig();
     }
 
     private void registerRecipes() {
