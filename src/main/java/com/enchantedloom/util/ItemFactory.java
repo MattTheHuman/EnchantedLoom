@@ -90,6 +90,8 @@ public class ItemFactory {
 
         meta.setDisplayName(ChatColor.AQUA + "" + ChatColor.BOLD + "Diamond String");
         meta.setLore(List.of(ChatColor.GRAY + "Infused with diamond dust"));
+        meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.getPersistentDataContainer().set(diamondStringKey, PersistentDataType.BYTE, (byte) 1);
 
         item.setItemMeta(meta);
