@@ -35,8 +35,10 @@ public class EnchantedLoomPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        // Save default config
+        // Save default config, then copy any new keys added since the server's copy was created
         saveDefaultConfig();
+        getConfig().options().copyDefaults(true);
+        saveConfig();
 
         // Build shared item factory
         itemFactory = new ItemFactory(this);
