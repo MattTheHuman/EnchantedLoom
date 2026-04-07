@@ -1,0 +1,40 @@
+# EnchantedLoom Configuration
+
+# The custom display name of the Enchanted Loom item/block.
+loom-name: "&5&lEnchanted Loom"
+
+# Lore lines shown on the Enchanted Loom item.
+loom-lore:
+  - "&7Infused with ancient magic"
+  - "&7All patterns and dyes included!"
+
+# Title shown in the Enchanted Loom GUI.
+gui-title: "&5&lEnchanted Loom"
+
+# Whether players can use a vanilla loom UI triggered by the block.
+# When true, right-clicking the Enchanted Loom opens the custom GUI below.
+use-custom-gui: true
+
+# Number of patterns shown per page in the pattern picker.
+patterns-per-page: 27
+
+# Maximum number of banner layers (Minecraft default is 6).
+max-banner-layers: 6
+
+# Whether the plugin should glow (enchantment glint) on the Enchanted Loom item.
+item-glow: true
+
+messages:
+  no-permission: "&cYou do not have permission to do that."
+  gui-opened: "&aOpened the Enchanted Loom!"
+  item-given: "&aGave &e%player% &ax%amount% Enchanted Loom(s)."
+  banner-created: "&aYour patterned banner has been created!"
+  banner-invalid-color: "&cInvalid colour: &e%value%&c. Use a valid dye colour name."
+  banner-invalid-pattern: "&cInvalid pattern: &e%value%&c. Use a valid pattern name."
+  banner-too-many-layers: "&cBanners can have at most &e%max% &clayers."
+  player-not-found: "&cPlayer &e%player% &cnot found."
+  inventory-full: "&cYour inventory is full! Item dropped at your feet."
+  save-prompt: "&aType a name for this banner design in chat. Type &ccancel&a to abort."
+  banner-saved: "&aBanner saved as '&f{name}&a'!"
+  banner-retrieved: "&aBanner '&f{name}&a' added to your inventory!"
+  banner-deleted: "&cDeleted saved banner: &f{name}"

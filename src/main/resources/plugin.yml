@@ -1,0 +1,47 @@
+name: EnchantedLoom
+version: ${project.version}
+main: com.enchantedloom.EnchantedLoomPlugin
+api-version: '1.21'
+description: A magical loom that provides every banner pattern and dye colour freely.
+authors:
+  - EnchantedLoom
+
+commands:
+  enchantedloom:
+    description: EnchantedLoom root command.
+    usage: /enchantedloom <open|give|banner>
+    aliases: [eloom]
+  elopen:
+    description: Open the Enchanted Loom GUI.
+    usage: /elopen [player]
+    permission: enchantedloom.open
+  elgive:
+    description: Give a player an Enchanted Loom block.
+    usage: /elgive [player] [amount]
+    permission: enchantedloom.give
+  elbanner:
+    description: Generate a patterned banner and give it to a player.
+    usage: /elbanner <base_color> [pattern:color ...] [player]
+    permission: enchantedloom.banner
+
+permissions:
+  enchantedloom.open:
+    description: Allows opening the Enchanted Loom GUI.
+    default: true
+  enchantedloom.give:
+    description: Allows giving Enchanted Loom blocks.
+    default: op
+  enchantedloom.banner:
+    description: Allows generating patterned banners via command.
+    default: op
+  enchantedloom.use:
+    description: Allows interacting with the Enchanted Loom block.
+    default: true
+  enchantedloom.admin:
+    description: Full admin access to all EnchantedLoom features.
+    default: op
+    children:
+      enchantedloom.open: true
+      enchantedloom.give: true
+      enchantedloom.banner: true
+      enchantedloom.use: true
