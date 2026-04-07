@@ -257,18 +257,8 @@ public class GUIListener implements Listener {
                 }
                 gui.redraw();
             } else {
-                // Give a copy of the saved banner
-                ItemStack banner = buildSavedBannerItem(saved);
-                if (player.getInventory().firstEmpty() == -1) {
-                    player.getWorld().dropItemNaturally(player.getLocation(), banner);
-                    player.sendMessage(Messages.get("inventory-full", plugin));
-                } else {
-                    player.getInventory().addItem(banner);
-                    player.sendMessage(plugin.getConfig().getString(
-                            "messages.banner-retrieved", "&aBanner &f{name}&a retrieved!")
-                            .replace("{name}", saved.name())
-                            .replace("&", "§"));
-                }
+                // Give a copy of the saved banner, consuming a blank if required
+                giveSavedBanner(player, saved);
             }
         }
     }
@@ -276,6 +266,55 @@ public class GUIListener implements Listener {
     // -------------------------------------------------------------------------
     // Give banner (take action)
     // -------------------------------------------------------------------------
+
+    /**
+     * Gives the player a copy of a saved banner design.
+     * Respects {@code require-blank-banner} and creative mode in the same way as {@link #giveBanner}.
+     */
+    private void giveSavedBanner(Player player, BannerStorage.SavedBanner saved) {
+        boolean requireBlank = plugin.getConfig().getBoolean("require-blank-banner", true);
+        boolean isCreative   = player.getGameMode() == org.bukkit.GameMode.CREATIVE;
+
+        if (requireBlank && !isCreative) {
+            Material blankMaterial = EnchantedLoomGUI.bannerMaterialFor(saved.base());
+            ItemStack[] contents = player.getInventory().getContents();
+            int consumeSlot = -1;
+            for (int i = 0; i < contents.length; i++) {
+                ItemStack item = contents[i];
+                if (item == null || item.getType() != blankMaterial) continue;
+                ItemMeta meta = item.getItemMeta();
+                if (!(meta instanceof BannerMeta bannerMeta)) continue;
+                if (!bannerMeta.getPatterns().isEmpty()) continue;
+                consumeSlot = i;
+                break;
+            }
+
+            if (consumeSlot == -1) {
+                player.sendMessage(Messages.get("banner-no-blank-banner", plugin,
+                        "color", EnchantedLoomGUI.formatDyeName(saved.base())));
+                return;
+            }
+
+            ItemStack blank = player.getInventory().getItem(consumeSlot);
+            if (blank.getAmount() > 1) {
+                blank.setAmount(blank.getAmount() - 1);
+            } else {
+                player.getInventory().setItem(consumeSlot, null);
+            }
+        }
+
+        ItemStack banner = buildSavedBannerItem(saved);
+        if (player.getInventory().firstEmpty() == -1) {
+            player.getWorld().dropItemNaturally(player.getLocation(), banner);
+            player.sendMessage(Messages.get("inventory-full", plugin));
+        } else {
+            player.getInventory().addItem(banner);
+            player.sendMessage(plugin.getConfig().getString(
+                    "messages.banner-retrieved", "&aBanner &f{name}&a retrieved!")
+                    .replace("{name}", saved.name())
+                    .replace("&", "§"));
+        }
+    }
 
     /**
      * Gives the player the patterned banner.

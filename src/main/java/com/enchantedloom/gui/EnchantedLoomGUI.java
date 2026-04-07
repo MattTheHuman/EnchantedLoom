@@ -398,11 +398,16 @@ public class EnchantedLoomGUI {
         if (page > 0) {
             inv.setItem(SLOT_SB_PREV, makeNav(false, "page"));
         }
+        boolean sbRequireBlank = plugin.getConfig().getBoolean("require-blank-banner", true);
+        boolean sbIsCreative   = session.getPlayer().getGameMode() == org.bukkit.GameMode.CREATIVE;
+        String clickHint = (sbRequireBlank && !sbIsCreative)
+                ? ChatColor.YELLOW + "Left-click: consumes a matching blank banner."
+                : ChatColor.GRAY   + "Left-click to get a copy.";
         inv.setItem(SLOT_SB_PAGE, makeInfo(
                 ChatColor.YELLOW + "Page " + (page + 1) + " / " + totalPages,
                 List.of(
                         ChatColor.GRAY + "Saved designs: " + banners.size(),
-                        ChatColor.GRAY + "Left-click to get a copy.",
+                        clickHint,
                         ChatColor.RED  + "Shift-click to delete."
                 )
         ));
@@ -430,7 +435,15 @@ public class EnchantedLoomGUI {
                         + ChatColor.GRAY + " / " + formatDyeName(p.getColor()));
             }
             lore.add("");
-            lore.add(ChatColor.GREEN   + "Left-click to get a copy.");
+            boolean requireBlank = plugin.getConfig().getBoolean("require-blank-banner", true);
+            boolean isCreative   = session.getPlayer().getGameMode() == org.bukkit.GameMode.CREATIVE;
+            if (requireBlank && !isCreative) {
+                lore.add(ChatColor.YELLOW + "Left-click: requires a blank "
+                        + ChatColor.WHITE + formatDyeName(saved.base())
+                        + ChatColor.YELLOW + " banner.");
+            } else {
+                lore.add(ChatColor.GREEN + "Left-click to get a copy.");
+            }
             lore.add(ChatColor.RED     + "Shift-click to delete.");
             meta.setLore(lore);
             banner.setItemMeta(meta);
