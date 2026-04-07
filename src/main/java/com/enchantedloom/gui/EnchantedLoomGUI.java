@@ -279,13 +279,17 @@ public class EnchantedLoomGUI {
 
         String takenLine = session.getBannersTaken() > 0
                 ? ChatColor.DARK_AQUA + "Taken this session: " + session.getBannersTaken()
-                : ChatColor.GRAY + "Click to receive a copy of this banner.";
+                : ChatColor.GRAY + "Consumes one blank "
+                        + ChatColor.WHITE + formatDyeName(session.getBaseColor())
+                        + ChatColor.GRAY + " banner from your inventory.";
         inv.setItem(SLOT_CONFIRM, makeControl(Material.EMERALD,
                 ChatColor.GREEN + "" + ChatColor.BOLD + "Take Banner",
                 List.of(
+                        ChatColor.GRAY + "Requires a blank "
+                                + ChatColor.WHITE + formatDyeName(session.getBaseColor())
+                                + ChatColor.GRAY + " banner in your inventory.",
                         ChatColor.GRAY + "Layers: " + session.getLayers().size(),
-                        takenLine,
-                        ChatColor.YELLOW + "GUI stays open -- click as many times as you like!"
+                        takenLine
                 )));
     }
 
