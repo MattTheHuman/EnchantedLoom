@@ -448,8 +448,7 @@ public class EnchantedLoomGUI {
             } else {
                 lore.add(ChatColor.GREEN + "Left-click to get a copy.");
             }
-            boolean canDelete = saved.ownerId().equals(session.getPlayer().getUniqueId())
-                    || session.getPlayer().hasPermission("enchantedloom.admin");
+            boolean canDelete = saved.ownerId().equals(session.getPlayer().getUniqueId());
             if (canDelete) {
                 lore.add(ChatColor.RED + "Shift-click to delete.");
             }

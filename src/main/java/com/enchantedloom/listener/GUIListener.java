@@ -241,10 +241,8 @@ public class GUIListener implements Listener {
             BannerStorage.SavedBanner saved = banners.get(idx);
 
             if (isShift) {
-                // Only the owner (or an admin) may delete a design
-                boolean canDelete = saved.ownerId().equals(player.getUniqueId())
-                        || player.hasPermission("enchantedloom.admin");
-                if (!canDelete) {
+                // Only the owner may delete their own design through the GUI
+                if (!saved.ownerId().equals(player.getUniqueId())) {
                     player.sendMessage(Messages.get("no-permission", plugin));
                     return;
                 }
