@@ -34,7 +34,7 @@ messages:
   gui-opened: "&aOpened the Enchanted Loom!"
   item-given: "&aGave &e%player% &ax%amount% Enchanted Loom(s)."
   banner-created: "&aYour patterned banner has been created!"
-  banner-no-blank-banner: "&cYou need a blank &e%color% &cbanner in your inventory!"
+  banner-no-blank-banner: "&cYou need a blank &e%color% &cbanner in your inventory to take this design!"
   banner-invalid-color: "&cInvalid colour: &e%value%&c. Use a valid dye colour name."
   banner-invalid-pattern: "&cInvalid pattern: &e%value%&c. Use a valid pattern name."
   banner-too-many-layers: "&cBanners can have at most &e%max% &clayers."

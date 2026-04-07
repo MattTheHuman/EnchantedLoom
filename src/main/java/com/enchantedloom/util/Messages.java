@@ -21,8 +21,12 @@ public final class Messages {
     public static String get(String path,
                              com.enchantedloom.EnchantedLoomPlugin plugin,
                              String... args) {
-        String raw = plugin.getConfig().getString("messages." + path,
-                "&cMessage not found: " + path);
+        // Fall back to the default config value so missing keys in a player's
+        // server config never surface as a raw "Message not found" string.
+        String defaultValue = plugin.getConfig().getDefaults() != null
+                ? plugin.getConfig().getDefaults().getString("messages." + path, "&cMessage not found: " + path)
+                : "&cMessage not found: " + path;
+        String raw = plugin.getConfig().getString("messages." + path, defaultValue);
         // Replace placeholders
         for (int i = 0; i + 1 < args.length; i += 2) {
             raw = raw.replace("%" + args[i] + "%", args[i + 1]);
